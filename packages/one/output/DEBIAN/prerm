@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+BUN_BIN="/usr/lib/bun/BUN_VERSION/bun"
+
+if [ -f "$BUN_BIN" ]; then
+    update-alternatives --remove bun "$BUN_BIN" || true
+fi
+
+exit 0
+

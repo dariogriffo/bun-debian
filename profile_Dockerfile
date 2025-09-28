@@ -1,0 +1,49 @@
+ARG DEBIAN_DIST=bookworm
+FROM debian:$DEBIAN_DIST
+
+ARG BUN_VERSION
+ARG DEBIAN_DIST
+ARG BUILD_VERSION
+ARG FULL_VERSION
+
+RUN mkdir -p /output/usr/lib/bun-profile/$BUN_VERSION
+COPY bun /output/usr/lib/bun-profile/$BUN_VERSION/
+COPY bun.linker-map /output/usr/lib/bun-profile/$BUN_VERSION/
+
+RUN mkdir -p /output/DEBIAN
+RUN mkdir -p /output/usr/share/doc/bun-profile/
+
+COPY packages/profile/output/DEBIAN/control /output/DEBIAN/
+COPY packages/profile/output/DEBIAN/postinst /output/DEBIAN/
+COPY packages/profile/output/DEBIAN/prerm /output/DEBIAN/
+COPY packages/profile/output/DEBIAN/postrm /output/DEBIAN/
+RUN chmod 755 /output/DEBIAN/postinst
+RUN chmod 755 /output/DEBIAN/prerm
+RUN chmod 755 /output/DEBIAN/postrm
+
+COPY packages/profile/output/changelog.Debian /output/usr/share/doc/bun-profile/changelog.Debian
+COPY packages/profile/output/copyright /output/usr/share/doc/bun-profile/
+
+RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/usr/share/doc/bun-profile/changelog.Debian
+RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/usr/share/doc/bun-profile/changelog.Debian
+RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/usr/share/doc/bun-profile/changelog.Debian
+
+RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/control
+RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/control
+RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/control
+
+RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/postinst
+RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/postinst
+RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/postinst
+
+RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/prerm
+RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/prerm
+RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/prerm
+
+RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/postrm
+RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/postrm
+RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/postrm
+
+RUN dpkg-deb --build /output /bun-profile_${FULL_VERSION}.deb
+
+

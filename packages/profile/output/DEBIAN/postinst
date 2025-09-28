@@ -1,0 +1,11 @@
+#!/bin/sh
+set -e
+
+BUN_BIN="/usr/lib/bun-profile/BUN_VERSION/bun"
+
+if [ -f "$BUN_BIN" ]; then
+    update-alternatives --install /usr/bin/bun bun "$BUN_BIN" 100
+fi
+
+exit 0
+
