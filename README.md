@@ -22,6 +22,7 @@ This repository contains build scripts to produce the _unofficial_ Debian packag
 Currently supported debian distros are:
 - Bookworm
 - Trixie
+- Forky
 - Sid
 
 This is an unofficial community project to provide a package that's easy to
