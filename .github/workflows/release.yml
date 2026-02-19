@@ -24,7 +24,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Build bun
-        run: ./build_bun_debian.sh ${{ inputs.bun_version }} ${{ inputs.build_version }}
+        run: ./build.sh ${{ inputs.bun_version }} ${{ inputs.build_version }}
       
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
