@@ -1,6 +1,6 @@
 BUN_VERSION=$1
 BUILD_VERSION=$2
-declare -a arr=("jammy" "noble")
+declare -a arr=("jammy" "noble" "questing" "resolute")
 
 mkdir -p completions
 wget -O completions/bun.bash https://raw.githubusercontent.com/oven-sh/bun/bun-v$BUN_VERSION/completions/bun.bash
