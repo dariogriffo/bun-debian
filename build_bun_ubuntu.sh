@@ -1,6 +1,12 @@
 BUN_VERSION=$1
 BUILD_VERSION=$2
 declare -a arr=("jammy" "noble")
+
+mkdir -p completions
+wget -O completions/bun.bash https://raw.githubusercontent.com/oven-sh/bun/bun-v$BUN_VERSION/completions/bun.bash
+wget -O completions/bun.fish https://raw.githubusercontent.com/oven-sh/bun/bun-v$BUN_VERSION/completions/bun.fish
+wget -O completions/bun.zsh https://raw.githubusercontent.com/oven-sh/bun/bun-v$BUN_VERSION/completions/bun.zsh
+
 for i in "${arr[@]}"
 do
   UBUNTU_DIST=$i

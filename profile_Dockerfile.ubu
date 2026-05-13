@@ -10,6 +10,11 @@ RUN mkdir -p /output/usr/lib/bun-profile/$BUN_VERSION
 COPY bun /output/usr/lib/bun-profile/$BUN_VERSION/
 COPY bun.linker-map /output/usr/lib/bun-profile/$BUN_VERSION/
 
+RUN mkdir -p /output/usr/lib/bun-profile/$BUN_VERSION/completions
+COPY completions/bun.bash /output/usr/lib/bun-profile/$BUN_VERSION/completions/
+COPY completions/bun.fish /output/usr/lib/bun-profile/$BUN_VERSION/completions/
+COPY completions/bun.zsh /output/usr/lib/bun-profile/$BUN_VERSION/completions/
+
 RUN mkdir -p /output/DEBIAN
 RUN mkdir -p /output/usr/share/doc/bun-profile/
 

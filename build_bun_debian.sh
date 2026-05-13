@@ -1,9 +1,15 @@
 BUN_VERSION=$1
 BUILD_VERSION=$2
 declare -a arr=("bookworm" "trixie" "forky" "sid")
+
+mkdir -p completions
+wget -O completions/bun.bash https://raw.githubusercontent.com/oven-sh/bun/bun-v$BUN_VERSION/completions/bun.bash
+wget -O completions/bun.fish https://raw.githubusercontent.com/oven-sh/bun/bun-v$BUN_VERSION/completions/bun.fish
+wget -O completions/bun.zsh https://raw.githubusercontent.com/oven-sh/bun/bun-v$BUN_VERSION/completions/bun.zsh
+
 for i in "${arr[@]}"
 do
-  
+
   DEBIAN_DIST=$i
   FULL_VERSION=$BUN_VERSION-${BUILD_VERSION}+${DEBIAN_DIST}_amd64
 
@@ -12,7 +18,7 @@ do
   wget https://github.com/oven-sh/bun/releases/download/bun-v$BUN_VERSION/bun-linux-x64.zip
   unzip bun-linux-x64.zip
   cd ..
-  
+
   mv one/bun-linux-x64/bun .
   ls -la
   
