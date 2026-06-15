@@ -1,0 +1,28 @@
+Source: bun
+Section: devel
+Priority: optional
+Maintainer: Dario Griffo <dariogriffo@gmail.com>
+Build-Depends: debhelper-compat (= 13), wget, ca-certificates, unzip
+Standards-Version: 4.6.2
+Homepage: https://github.com/oven-sh/bun
+Rules-Requires-Root: no
+
+Package: bun-one
+Architecture: amd64
+Depends: ${misc:Depends}
+Description: Bun is an all-in-one toolkit for JavaScript and TypeScript apps.
+ Bun is an all-in-one toolkit for JavaScript and TypeScript apps. It ships
+ as a single executable called bun.
+
+Package: bun-profile
+Architecture: amd64
+Depends: ${misc:Depends}
+Description: Bun profile build - an all-in-one toolkit for JavaScript and TypeScript apps.
+ Bun profile build is an all-in-one toolkit for JavaScript and TypeScript apps.
+ This package contains the profile (debug-instrumented) build of bun.
+
+Package: bun
+Architecture: amd64
+Depends: bun-one, ${misc:Depends}
+Description: Bun meta-package - an all-in-one toolkit for JavaScript and TypeScript apps.
+ This is a meta-package that depends on bun-one.

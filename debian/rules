@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+PKG_VERSION := $(shell dpkg-parsechangelog -S Version | sed 's/[-~].*//')
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+
+override_dh_auto_build:
+	wget -q "https://github.com/oven-sh/bun/releases/download/bun-v$(PKG_VERSION)/bun-linux-x64.zip"
+	unzip -q bun-linux-x64.zip
+	rm -f bun-linux-x64.zip
+
+override_dh_auto_install:
+	install -D -m 755 bun-linux-x64/bun debian/bun-one/usr/lib/bun/$(PKG_VERSION)/bun
+	mkdir -p debian/bun-one/usr/bin
+
+override_dh_auto_test:
+
+override_dh_auto_clean:
+	rm -rf bun-linux-x64
+
+override_dh_strip:
+
+override_dh_shlibdeps:

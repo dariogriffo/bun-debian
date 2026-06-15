@@ -18,14 +18,14 @@ permissions:
 jobs:
   build-bun:
     name: Build
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout bun-debian
         uses: actions/checkout@v4
 
       - name: Build bun
         run: ./build.sh ${{ inputs.bun_version }} ${{ inputs.build_version }}
-      
+
       - name: Upload Artifact
         uses: actions/upload-artifact@v4
         with:
@@ -35,17 +35,45 @@ jobs:
             bun-profile_*.deb
             bun_*.deb
 
+  build-src:
+    name: Build Source Package
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout bun-debian
+        uses: actions/checkout@v4
+
+      - name: Install build dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends dpkg-dev devscripts wget ca-certificates
+
+      - name: Build source packages
+        run: ./build_src.sh ${{ inputs.bun_version }} ${{ inputs.build_version }}
+
+      - name: Upload Source Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: source-artifact
+          path: |
+            bun_*.dsc
+            bun_*.orig.tar.gz
+            bun_*.debian.tar.xz
 
   release-bun:
     name: (Draft-)Release bun for Debian
     if: github.event_name == 'workflow_dispatch' && github.ref == 'refs/heads/main'
     runs-on: ubuntu-latest
-    needs: build-bun
+    needs: [build-bun, build-src]
     steps:
-      - name: Download All Artifacts
+      - name: Download Binary Artifacts
         uses: actions/download-artifact@v4
         with:
           name: artifact
+
+      - name: Download Source Artifacts
+        uses: actions/download-artifact@v4
+        with:
+          name: source-artifact
 
       - name: Publish Release Draft
         uses: softprops/action-gh-release@v2
@@ -55,7 +83,9 @@ jobs:
             bun-one_*.deb
             bun-profile_*.deb
             bun_*.deb
+            bun_*.dsc
+            bun_*.orig.tar.gz
+            bun_*.debian.tar.xz
           name: ${{ inputs.bun_version }}+${{ inputs.build_version }}
           tag_name: ${{ env.RELEASE_TAG }}
           fail_on_unmatched_files: true
-
