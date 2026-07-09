@@ -10,7 +10,7 @@ wget -O completions/bun.zsh https://raw.githubusercontent.com/oven-sh/bun/bun-v$
 for i in "${arr[@]}"
 do
   UBUNTU_DIST=$i
-  FULL_VERSION=$BUN_VERSION-${BUILD_VERSION}+${UBUNTU_DIST}_amd64_ubu
+  FULL_VERSION=$BUN_VERSION-${BUILD_VERSION}~${UBUNTU_DIST}_amd64_ubu
 
   mkdir one
   cd one

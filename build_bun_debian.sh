@@ -11,7 +11,7 @@ for i in "${arr[@]}"
 do
 
   DEBIAN_DIST=$i
-  FULL_VERSION=$BUN_VERSION-${BUILD_VERSION}+${DEBIAN_DIST}_amd64
+  FULL_VERSION=$BUN_VERSION-${BUILD_VERSION}~${DEBIAN_DIST}_amd64
 
   mkdir one
   cd one
