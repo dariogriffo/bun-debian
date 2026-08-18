@@ -115,11 +115,16 @@ REPO="${rest#*/}"; REPO="${REPO%%/*}"
 info "Upstream: host=$HOST owner=$OWNER repo=$REPO"
 
 # --- Candidate refs (versioned tag preferred; default branch last resort) ---
+# Upstreams disagree on tag naming: v-prefixed ("v1.2.3"), bare ("1.2.3"), or
+# project-prefixed -- oven-sh/bun tags releases "bun-v1.2.3", so the first two
+# forms 404 and the check silently fell through to the default branch. Try the
+# project-prefixed forms first (most specific), then the common conventions.
+# Set LICENSE_REF to pin an exact ref for anything not covered here.
 declare -a REFS=()
 if [ -n "${LICENSE_REF:-}" ]; then
   REFS+=("$LICENSE_REF")
 elif [ -n "$VERSION" ]; then
-  REFS+=("v$VERSION" "$VERSION")
+  REFS+=("$REPO-v$VERSION" "$REPO-$VERSION" "v$VERSION" "$VERSION")
 fi
 REFS+=("")   # "" == upstream default branch (fallback for nightly/dev builds)
 
@@ -230,6 +235,38 @@ if [ -z "$verdict" ]; then
   elif printf '%s' "$lc" | grep -q "boost software license";             then detected="BSL-1.0"; verdict="allow"
   elif printf '%s' "$lc" | grep -q "do what the fuck you want";           then detected="WTFPL"; verdict="allow"
   elif printf '%s' "$lc" | grep -q "altered source versions must be plainly marked"; then detected="Zlib"; verdict="allow"
+  fi
+fi
+
+# Some upstreams ship a composite license file that *states* the project's
+# license instead of reproducing its text. oven-sh/bun's LICENSE.md opens with
+# "Bun itself is MIT-licensed." and then tabulates the licenses of everything it
+# statically links. GitHub reports those files as NOASSERTION and none of the
+# full-text matchers above fire, so read the self-declaration instead.
+#
+# Deliberately narrow: the sentence must be about the project ITSELF, so the
+# per-dependency rows in those same tables ("| brotli | MIT |") cannot trigger
+# it. Restrictive add-on clauses (Commons Clause, BUSL, NC, ...) were already
+# rejected further up, so anything reaching here has a clean license text.
+if [ -z "$verdict" ]; then
+  decl="$(printf '%s' "$lc" | grep -oE \
+    '(itself|this (project|software|repository|library|package|program)) (is|are) (dual[- ])?(licensed under |released under |distributed under |available under )?(the )?[a-z0-9 .+-]{2,40}' \
+    | head -1)"
+  if [ -n "$decl" ]; then
+    info "No license text matched; reading self-declaration: '$decl'"
+    if   printf '%s' "$decl" | grep -qE '\bmit\b';        then detected="MIT (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bapache\b';     then detected="Apache (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bagpl\b';       then detected="AGPL (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\blgpl\b';       then detected="LGPL (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bgpl\b';        then detected="GPL (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bmpl\b|mozilla'; then detected="MPL (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bbsd\b';        then detected="BSD (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bisc\b';        then detected="ISC (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bzlib\b';       then detected="Zlib (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bunlicense\b|public domain'; then detected="Unlicense (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE '\bcc0\b';        then detected="CC0-1.0 (declared)"; verdict="allow"
+    elif printf '%s' "$decl" | grep -qE 'boost';          then detected="BSL-1.0 (declared)"; verdict="allow"
+    fi
   fi
 fi
 

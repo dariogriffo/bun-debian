@@ -1,0 +1,14 @@
+#!/bin/sh
+set -e
+
+BUN_BIN="/usr/lib/bun/@PKG_VERSION@/bun"
+
+# The alternative path is version-qualified, so on upgrade this removes the
+# entry for the version being replaced while the new postinst adds its own.
+if [ -f "$BUN_BIN" ]; then
+    update-alternatives --remove bun "$BUN_BIN" || true
+fi
+
+#DEBHELPER#
+
+exit 0

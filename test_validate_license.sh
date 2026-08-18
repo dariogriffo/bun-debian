@@ -165,6 +165,70 @@ Permission is hereby granted, free of charge, to deal in the Software.
 EOF
 
 echo
+echo "== composite license files that DECLARE the project license =="
+
+# oven-sh/bun's real LICENSE.md shape: a self-declaration, then a table of the
+# licenses of everything statically linked. GitHub reports these NOASSERTION.
+run "bun-style composite (declared MIT)" 0 "NOASSERTION" <<'EOF'
+Bun itself is MIT-licensed.
+
+## JavaScriptCore
+
+Bun statically links JavaScriptCore (and WebKit) which is LGPL-2 licensed.
+
+## Linked libraries
+
+| Library | License |
+|---------|---------|
+| `brotli` | MIT |
+| `tinycc` | LGPL v2.1 |
+| `simdutf` | Apache 2.0 |
+EOF
+
+run "declared Apache" 0 <<'EOF'
+This project is licensed under the Apache License, Version 2.0.
+EOF
+
+run "declared LGPL" 0 <<'EOF'
+This library is released under the LGPL v2.1.
+EOF
+
+# The matcher must key off the statement about the project ITSELF. A bare
+# dependency table full of "MIT" rows says nothing about the project's own
+# terms and must NOT be enough to pass.
+run "dependency table only, no self-declaration" 1 "NOASSERTION" <<'EOF'
+## Linked libraries
+
+| Library | License |
+|---------|---------|
+| `brotli` | MIT |
+| `mimalloc` | MIT |
+| `simdutf` | Apache 2.0 |
+| `libuv` | MIT |
+EOF
+
+# Restrictive add-ons must still win over a permissive self-declaration.
+run "declared MIT but Commons Clause" 1 "NOASSERTION" <<'EOF'
+Bun itself is MIT-licensed.
+
+"Commons Clause" License Condition v1.0 — you may not Sell the Software.
+
+| Library | License |
+|---------|---------|
+| `brotli` | MIT |
+EOF
+
+run "declared MIT but noncommercial-only" 1 "NOASSERTION" <<'EOF'
+This project is MIT-licensed.
+The compiled binaries are provided for non-commercial use only.
+EOF
+
+run "declared proprietary" 1 "NOASSERTION" <<'EOF'
+This software is licensed under the ACME Proprietary Terms.
+All rights reserved. Contact sales for a quote.
+EOF
+
+echo
 echo "== fail-closed on unidentifiable licenses (expect exit 1) =="
 run "unknown custom license" 1 <<'EOF'
 ACME Proprietary Terms. All rights reserved. Contact sales for a quote.

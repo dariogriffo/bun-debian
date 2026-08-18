@@ -1,5 +1,10 @@
 #!/usr/bin/make -f
 PKG_VERSION := $(shell dpkg-parsechangelog -S Version | sed 's/[-~].*//')
+UPSTREAM_TAG := bun-v$(PKG_VERSION)
+RELEASE_URL := https://github.com/oven-sh/bun/releases/download/$(UPSTREAM_TAG)
+
+BUN_DIR := debian/bun-one/usr/lib/bun/$(PKG_VERSION)
+PROFILE_DIR := debian/bun-profile/usr/lib/bun-profile/$(PKG_VERSION)
 
 %:
 	dh $@
@@ -7,21 +12,46 @@ PKG_VERSION := $(shell dpkg-parsechangelog -S Version | sed 's/[-~].*//')
 override_dh_auto_configure:
 
 override_dh_auto_build:
-	wget -q "https://github.com/oven-sh/bun/releases/download/bun-v$(PKG_VERSION)/bun-linux-x64.zip"
+	wget -q "$(RELEASE_URL)/bun-linux-x64.zip"
 	unzip -q bun-linux-x64.zip
 	rm -f bun-linux-x64.zip
+	wget -q "$(RELEASE_URL)/bun-linux-x64-profile.zip"
+	unzip -q bun-linux-x64-profile.zip
+	rm -f bun-linux-x64-profile.zip
 
 override_dh_auto_install:
-	install -D -m 755 bun-linux-x64/bun debian/bun-one/usr/lib/bun/$(PKG_VERSION)/bun
-	# bunx is a symlink to the bun binary upstream; bun dispatches on argv[0]
-	ln -sf bun debian/bun-one/usr/lib/bun/$(PKG_VERSION)/bunx
-	mkdir -p debian/bun-one/usr/bin
+	# bun-one: versioned binary + bunx symlink + shell completions.
+	# bunx is a symlink to the bun binary upstream; bun dispatches on argv[0].
+	install -D -m 755 bun-linux-x64/bun $(BUN_DIR)/bun
+	ln -sf bun $(BUN_DIR)/bunx
+	install -D -m 644 completions/bun.bash $(BUN_DIR)/completions/bun.bash
+	install -D -m 644 completions/bun.fish $(BUN_DIR)/completions/bun.fish
+	install -D -m 644 completions/bun.zsh $(BUN_DIR)/completions/bun.zsh
+	# bun-profile: same layout, so update-alternatives can switch between them.
+	install -D -m 755 bun-linux-x64-profile/bun-profile $(PROFILE_DIR)/bun
+	install -D -m 644 bun-linux-x64-profile/bun-profile.linker-map $(PROFILE_DIR)/bun.linker-map
+	ln -sf bun $(PROFILE_DIR)/bunx
+	install -D -m 644 completions/bun.bash $(PROFILE_DIR)/completions/bun.bash
+	install -D -m 644 completions/bun.fish $(PROFILE_DIR)/completions/bun.fish
+	install -D -m 644 completions/bun.zsh $(PROFILE_DIR)/completions/bun.zsh
+
+# /usr/bin/bun and /usr/bin/bunx are managed by update-alternatives from the
+# maintainer scripts, which need the version baked into the versioned paths.
+execute_after_dh_installdeb:
+	for f in debian/bun-one/DEBIAN/postinst debian/bun-one/DEBIAN/prerm \
+	         debian/bun-profile/DEBIAN/postinst debian/bun-profile/DEBIAN/prerm; do \
+	    [ -f "$$f" ] && sed -i 's/@PKG_VERSION@/$(PKG_VERSION)/g' "$$f"; \
+	done
 
 override_dh_auto_test:
 
 override_dh_auto_clean:
-	rm -rf bun-linux-x64
+	rm -rf bun-linux-x64 bun-linux-x64-profile
 
 override_dh_strip:
+
+override_dh_dwz:
+
+override_dh_strip_nondeterminism:
 
 override_dh_shlibdeps:
