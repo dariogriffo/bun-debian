@@ -13,6 +13,8 @@ override_dh_auto_build:
 
 override_dh_auto_install:
 	install -D -m 755 bun-linux-x64/bun debian/bun-one/usr/lib/bun/$(PKG_VERSION)/bun
+	# bunx is a symlink to the bun binary upstream; bun dispatches on argv[0]
+	ln -sf bun debian/bun-one/usr/lib/bun/$(PKG_VERSION)/bunx
 	mkdir -p debian/bun-one/usr/bin
 
 override_dh_auto_test:

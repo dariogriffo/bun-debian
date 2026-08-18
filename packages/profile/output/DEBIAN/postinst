@@ -2,6 +2,7 @@
 set -e
 
 BUN_BIN="/usr/lib/bun-profile/BUN_VERSION/bun"
+BUN_BUNX="/usr/lib/bun-profile/BUN_VERSION/bunx"
 BUN_COMPLETIONS="/usr/lib/bun-profile/BUN_VERSION/completions"
 
 if [ -f "$BUN_BIN" ]; then
@@ -10,6 +11,7 @@ if [ -f "$BUN_BIN" ]; then
     mkdir -p /usr/share/zsh/vendor-completions
 
     update-alternatives --install /usr/bin/bun bun "$BUN_BIN" 100 \
+        --slave /usr/bin/bunx bunx "$BUN_BUNX" \
         --slave /usr/share/bash-completion/completions/bun bun.bash-completion "$BUN_COMPLETIONS/bun.bash" \
         --slave /usr/share/fish/vendor_completions.d/bun.fish bun.fish-completion "$BUN_COMPLETIONS/bun.fish" \
         --slave /usr/share/zsh/vendor-completions/_bun bun.zsh-completion "$BUN_COMPLETIONS/bun.zsh"

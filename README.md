@@ -48,6 +48,9 @@ sudo apt update
 sudo apt install bun
 ```
 
+This gives you both the `bun` and `bunx` commands. As upstream does, `bunx` is a
+symlink to the same binary; bun switches to `bun x` when invoked under that name.
+
 If you want you can also install bun-profile as an alternative:
 ```sh
 sudo apt install bun-profile
