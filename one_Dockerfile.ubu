@@ -5,9 +5,10 @@ ARG BUN_VERSION
 ARG UBUNTU_DIST
 ARG BUILD_VERSION
 ARG FULL_VERSION
+ARG ARCH
 
 RUN mkdir -p /output/usr/lib/bun/$BUN_VERSION
-COPY bun /output/usr/lib/bun/$BUN_VERSION/
+COPY dist/${ARCH}/one/bun /output/usr/lib/bun/$BUN_VERSION/
 
 # bunx is upstream a symlink to the bun binary; bun dispatches on argv[0].
 RUN ln -s bun /output/usr/lib/bun/$BUN_VERSION/bunx
@@ -39,6 +40,7 @@ RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/usr/share/doc/bun/changelog.Deb
 RUN sed -i "s/DIST/$UBUNTU_DIST/" /output/DEBIAN/control
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/control
 RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/control
+RUN sed -i "s/SUPPORTED_ARCHITECTURES/$ARCH/" /output/DEBIAN/control
 
 RUN sed -i "s/DIST/$UBUNTU_DIST/" /output/DEBIAN/postinst
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/postinst

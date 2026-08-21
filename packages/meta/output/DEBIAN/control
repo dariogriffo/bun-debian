@@ -4,7 +4,7 @@ Maintainer: Dario Griffo <dariogriffo@gmail.com>
 Homepage: https://bunlang.org/
 Package: bun
 Version: BUN_VERSION-BUILD_VERSION~DIST
-Architecture: amd64
+Architecture: SUPPORTED_ARCHITECTURES
 Depends: bun-one
 Description: Bun is an all-in-one toolkit for JavaScript and TypeScript apps. This is a meta package.
 

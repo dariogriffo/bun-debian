@@ -59,4 +59,4 @@ jobs:
           fi
 
           echo "New release detected: ${ours_ver:-<none>} -> ${up_ver}. Dispatching build."
-          gh workflow run release.yml -f "${VERSION_INPUT}=${up_ver}" -f build_version=1 
+          gh workflow run release.yml -f "${VERSION_INPUT}=${up_ver}" -f build_version=1 -f architecture=all

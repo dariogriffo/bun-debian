@@ -1,7 +1,16 @@
 # .deb Packages
 *.deb
 
+# Source packages
+*.dsc
+*.orig.tar.gz
+*.debian.tar.xz
+
+# Downloaded / staged upstream release artifacts
+/dist/
+/completions/
+/usr/
+/DEBIAN/
+
 .idea/*
 .DS_Store
-
-

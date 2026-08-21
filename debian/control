@@ -8,21 +8,21 @@ Homepage: https://github.com/oven-sh/bun
 Rules-Requires-Root: no
 
 Package: bun-one
-Architecture: amd64
-Depends: ${misc:Depends}
+Architecture: amd64 arm64
+Depends: ${misc:Depends}, libc6 (>= 2.17)
 Description: Bun is an all-in-one toolkit for JavaScript and TypeScript apps.
  Bun is an all-in-one toolkit for JavaScript and TypeScript apps. It ships
  as a single executable called bun.
 
 Package: bun-profile
-Architecture: amd64
-Depends: ${misc:Depends}
+Architecture: amd64 arm64
+Depends: ${misc:Depends}, libc6 (>= 2.17)
 Description: Bun profile build - an all-in-one toolkit for JavaScript and TypeScript apps.
  Bun profile build is an all-in-one toolkit for JavaScript and TypeScript apps.
  This package contains the profile (debug-instrumented) build of bun.
 
 Package: bun
-Architecture: amd64
+Architecture: amd64 arm64
 Depends: bun-one, ${misc:Depends}
 Description: Bun meta-package - an all-in-one toolkit for JavaScript and TypeScript apps.
  This is a meta-package that depends on bun-one.

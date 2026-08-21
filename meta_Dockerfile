@@ -5,6 +5,7 @@ ARG BUN_VERSION
 ARG DEBIAN_DIST
 ARG BUILD_VERSION
 ARG FULL_VERSION
+ARG ARCH
 
 RUN mkdir -p /output/DEBIAN
 
@@ -15,5 +16,6 @@ RUN chmod 755 /output/DEBIAN/postinst
 RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/control
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/control
 RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/control
+RUN sed -i "s/SUPPORTED_ARCHITECTURES/$ARCH/" /output/DEBIAN/control
 
 RUN dpkg-deb --build /output /bun_$FULL_VERSION.deb
