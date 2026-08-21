@@ -27,7 +27,22 @@ if [ ! -f "$ORIG_TARBALL" ]; then
     # Re-pack to match expected directory name bun-{VERSION}
     tar -xf "${UPSTREAM_DIR}.tar.gz"
     mv "${UPSTREAM_DIR}" "${BUILD_DIR}"
-    tar -czf "$ORIG_TARBALL" "${BUILD_DIR}"
+    # Repack deterministically. A Debian pool holds exactly ONE
+    # <pkg>_<upstream-version>.orig.tar.gz, shared by every suite and every
+    # Debian revision, so rebuilding the same upstream version must produce
+    # byte-identical output or reprepro refuses the include — and because
+    # generate_index.sh runs under set -e, that one refusal aborts the whole
+    # publish sweep for every package. Plain `tar -czf` is not reproducible:
+    # gzip stamps a timestamp, and member order plus ownership come from the
+    # filesystem. Sorting members, pinning mtimes to upstream's own commit time
+    # (every file in a release tarball carries it), zeroing ownership and
+    # passing `gzip -n` removes all four sources of variation.
+    # awk rather than `head -1`: head exits after the first line, and on a tree
+    # this size that SIGPIPEs find/sort, which `set -o pipefail` then turns into
+    # a failed assignment and `set -e` into an aborted build.
+    SOURCE_DATE_EPOCH=$(find "$BUILD_DIR" -type f -printf '%T@\n' | sort -rn | awk 'NR==1 { printf "%d", $1 }')
+    tar --sort=name --mtime="@${SOURCE_DATE_EPOCH}" --owner=0 --group=0 --numeric-owner \
+        --format=gnu -cf - "${BUILD_DIR}" | gzip -9n > "$ORIG_TARBALL"
     rm -rf "${BUILD_DIR}" "${UPSTREAM_DIR}.tar.gz"
     echo "  Downloaded and repacked as $ORIG_TARBALL"
 else
@@ -72,7 +87,7 @@ done
 
 echo ""
 echo "Building Ubuntu source packages..."
-UBUNTU_DISTS=("jammy" "noble")
+UBUNTU_DISTS=("jammy" "noble" "questing" "resolute")
 for dist in "${UBUNTU_DISTS[@]}"; do
     build_source_package "$dist"
 done
