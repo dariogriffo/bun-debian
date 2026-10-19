@@ -1,8 +1,6 @@
-ARG DEBIAN_DIST=bookworm
-FROM debian:$DEBIAN_DIST
+FROM debian:bookworm
 
 ARG BUN_VERSION
-ARG DEBIAN_DIST
 ARG BUILD_VERSION
 ARG FULL_VERSION
 ARG ARCH
@@ -33,27 +31,22 @@ RUN chmod 755 /output/DEBIAN/postrm
 COPY packages/one/output/changelog.Debian /output/usr/share/doc/bun/changelog.Debian
 COPY packages/one/output/copyright /output/usr/share/doc/bun/
 
-RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/usr/share/doc/bun/changelog.Debian
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/usr/share/doc/bun/changelog.Debian
 RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/usr/share/doc/bun/changelog.Debian
 
-RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/control
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/control
 RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/control
 RUN sed -i "s/SUPPORTED_ARCHITECTURES/$ARCH/" /output/DEBIAN/control
 
-RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/postinst
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/postinst
 RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/postinst
 
-RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/prerm
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/prerm
 RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/prerm
 
-RUN sed -i "s/DIST/$DEBIAN_DIST/" /output/DEBIAN/postrm
 RUN sed -i "s/BUILD_VERSION/$BUILD_VERSION/" /output/DEBIAN/postrm
 RUN sed -i "s/BUN_VERSION/$BUN_VERSION/" /output/DEBIAN/postrm
 
-RUN dpkg-deb --build /output /bun-one_${FULL_VERSION}.deb
+RUN dpkg-deb -Zxz --build /output /bun-one_${FULL_VERSION}.deb
 
 

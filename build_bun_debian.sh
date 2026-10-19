@@ -54,26 +54,25 @@ fetch_completions() {
 # Stage one .deb built from a Dockerfile, then unpack the docker cp tar stream
 # over itself so the file left behind is the .deb rather than the stream.
 build_package() {
-    local pkg=$1 dockerfile=$2 dist=$3 build_arch=$4 full_version=$5
+    local pkg=$1 dockerfile=$2 build_arch=$3 full_version=$4
 
-    if ! docker build . -f "$dockerfile" -t "bun-$dist-$build_arch" \
+    if ! docker build . -f "$dockerfile" -t "bun-$build_arch" \
         --build-arg BUN_VERSION="$BUN_VERSION" \
-        --build-arg DEBIAN_DIST="$dist" \
         --build-arg BUILD_VERSION="$BUILD_VERSION" \
         --build-arg FULL_VERSION="$full_version" \
         --build-arg ARCH="$build_arch"; then
-        echo "❌ Failed to build $pkg image for $dist on $build_arch"
+        echo "❌ Failed to build $pkg image for $build_arch"
         return 1
     fi
 
     local id
-    id="$(docker create "bun-$dist-$build_arch")"
+    id="$(docker create "bun-$build_arch")"
     if ! docker cp "$id:/${pkg}_${full_version}.deb" - > "./${pkg}_${full_version}.deb"; then
-        echo "❌ Failed to extract ${pkg} .deb for $dist on $build_arch"
+        echo "❌ Failed to extract ${pkg} .deb for $build_arch"
         return 1
     fi
     if ! tar -xf "./${pkg}_${full_version}.deb"; then
-        echo "❌ Failed to extract ${pkg} .deb contents for $dist on $build_arch"
+        echo "❌ Failed to extract ${pkg} .deb contents for $build_arch"
         return 1
     fi
 }
@@ -120,17 +119,16 @@ build_architecture() {
         fi
     done
 
-    declare -a arr=("bookworm" "trixie" "forky" "sid")
+    # One set of packages for every suite: upstream's binaries need GLIBC_2.17
+    # at most, so only the old ~<suite> version suffix ever differed. The fixed
+    # ~griffo keeps it below the distro's own build of the same version.
+    FULL_VERSION="$BUN_VERSION-${BUILD_VERSION}~griffo_${build_arch}"
+    echo "  Building $FULL_VERSION"
 
-    for dist in "${arr[@]}"; do
-        FULL_VERSION="$BUN_VERSION-${BUILD_VERSION}~${dist}_${build_arch}"
-        echo "  Building $FULL_VERSION"
-
-        build_package bun-one one_Dockerfile "$dist" "$build_arch" "$FULL_VERSION" || return 1
-        build_package bun-profile profile_Dockerfile "$dist" "$build_arch" "$FULL_VERSION" || return 1
-        # bun: the meta package pointing at bun-one
-        build_package bun meta_Dockerfile "$dist" "$build_arch" "$FULL_VERSION" || return 1
-    done
+    build_package bun-one one_Dockerfile "$build_arch" "$FULL_VERSION" || return 1
+    build_package bun-profile profile_Dockerfile "$build_arch" "$FULL_VERSION" || return 1
+    # bun: the meta package pointing at bun-one
+    build_package bun meta_Dockerfile "$build_arch" "$FULL_VERSION" || return 1
 
     rm -rf "dist/$build_arch" || true
     echo "✅ Successfully built for $build_arch"

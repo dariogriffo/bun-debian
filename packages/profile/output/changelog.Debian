@@ -1,4 +1,4 @@
-bun (BUILD_VERSION) DIST; urgency=low
+bun (BUILD_VERSION) stable; urgency=low
   
   * https://github.com/oven-sh/bun/releases
 
